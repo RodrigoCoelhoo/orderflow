@@ -1,0 +1,19 @@
+# Variáveis de ambiente — nunca commitar
+.env
+
+# Maven
+**/target/
+**/.mvn/wrapper/maven-wrapper.jar
+
+# IntelliJ
+**/.idea/
+**/*.iml
+
+# VS Code
+**/.vscode/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
