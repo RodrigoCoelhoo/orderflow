@@ -16,7 +16,7 @@ import java.time.temporal.ChronoUnit;
 @Service
 public class TokenService {
 
-    @Value("${api.security.token.secret}")
+    @Value("${jwt.secret}")
     private String secret;
 
     private Algorithm getAlgorithm() {

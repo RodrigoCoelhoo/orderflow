@@ -79,7 +79,7 @@ public class SecurityFilter extends OncePerRequestFilter {
         return new UsernamePasswordAuthenticationToken(
                 profile,
                 null,
-                null
+                List.of()
         );
     }
 
