@@ -1,6 +1,6 @@
 package com.orderflow.order.config.security;
 
-import com.orderflow.order.security.TokenService;
+import com.orderflow.order.service.TokenService;
 import com.orderflow.order.model.User;
 import com.orderflow.order.repository.UserRepository;
 import com.orderflow.order.dto.UserProfile;
