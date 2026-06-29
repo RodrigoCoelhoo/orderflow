@@ -3,6 +3,7 @@ package com.orderflow.order.dto;
 import com.orderflow.order.model.Product;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 public record ProductResponse(
         Long id,
@@ -10,6 +11,7 @@ public record ProductResponse(
         String description,
         BigDecimal price,
         int discountPercentage,
+        LocalDateTime discountExpiresAt,
         BigDecimal effectivePrice,
         String imageUrl,
         Integer stock
@@ -21,6 +23,7 @@ public record ProductResponse(
                 data.getDescription(),
                 data.getPrice(),
                 data.getDiscountPercentage(),
+                data.getDiscountExpiresAt(),
                 data.getEffectivePrice(),
                 data.getImageUrl(),
                 data.getStock()

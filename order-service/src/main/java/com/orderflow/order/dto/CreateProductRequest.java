@@ -19,9 +19,10 @@ public record CreateProductRequest(
         @Digits(integer = 8, fraction = 2, message = "Invalid price format")
         BigDecimal price,
 
+        @NotNull(message = "Discount percentage cannot be null")
         @Min(value = 0, message = "Discount must be at least 0")
         @Max(value = 100, message = "Discount cannot exceed 100")
-        int discountPercentage,
+        Integer discountPercentage,
 
         LocalDateTime discountExpiresAt,
 

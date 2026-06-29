@@ -29,10 +29,10 @@ public class Product {
 
     // Note: single currency assumed (EUR). Multi-currency support out of scope.
     @Column(nullable = false, precision = 10, scale = 2) private BigDecimal price;
-    @Builder.Default @Column(nullable = false) private int discountPercentage = 0;
-    @Builder.Default private LocalDateTime discountExpiresAt = null;
+    @Column(nullable = false) private int discountPercentage;
+    private LocalDateTime discountExpiresAt;
 
-    @Builder.Default @Column(nullable = false) private Integer stock = 0;
+    @Column(nullable = false) private Integer stock;
 
     @CreatedDate private LocalDateTime createdAt;
     @LastModifiedDate private LocalDateTime updatedAt;
