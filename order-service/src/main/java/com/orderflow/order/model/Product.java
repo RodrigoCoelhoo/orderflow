@@ -7,6 +7,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 
 @Entity
@@ -26,12 +27,20 @@ public class Product {
     @Column(nullable = false) private String description;
     private String imageUrl;
 
+    // Note: single currency assumed (EUR). Multi-currency support out of scope.
     @Column(nullable = false, precision = 10, scale = 2) private BigDecimal price;
-    @Builder.Default @Column(nullable = false) private double discountPercentage = 0.0;
+    @Builder.Default @Column(nullable = false) private int discountPercentage = 0;
     @Builder.Default private LocalDateTime discountExpiresAt = null;
 
     @Builder.Default @Column(nullable = false) private Integer stock = 0;
 
     @CreatedDate private LocalDateTime createdAt;
     @LastModifiedDate private LocalDateTime updatedAt;
+
+    public BigDecimal getEffectivePrice() {
+        if (discountPercentage == 0.0) return price;
+        if (discountExpiresAt != null && discountExpiresAt.isBefore(LocalDateTime.now())) return price;
+        BigDecimal discount = BigDecimal.valueOf(discountPercentage / 100.0);
+        return price.multiply(BigDecimal.ONE.subtract(discount)).setScale(2, RoundingMode.HALF_UP);
+    }
 }
