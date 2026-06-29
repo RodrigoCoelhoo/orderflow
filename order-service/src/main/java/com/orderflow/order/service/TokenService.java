@@ -31,6 +31,7 @@ public class TokenService {
                     .withIssuer("auth-api")
                     .withSubject(user.getId().toString())
                     .withClaim("type", "access")
+                    .withClaim("role", user.getRole().name())
                     .withExpiresAt(Instant.now().plus(15, ChronoUnit.MINUTES))
                     .sign(getAlgorithm());
         } catch (JWTCreationException exception) {
