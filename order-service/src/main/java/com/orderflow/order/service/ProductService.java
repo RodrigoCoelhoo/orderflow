@@ -7,6 +7,8 @@ import com.orderflow.order.exceptions.ResourceNotFound;
 import com.orderflow.order.model.Product;
 import com.orderflow.order.repository.ProductRepository;
 import com.orderflow.order.utils.PagedResponse;
+import com.orderflow.order.utils.cloudinary.CloudinaryService;
+import com.orderflow.order.utils.cloudinary.CloudinaryUploadResult;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.List;
 
 @Slf4j
@@ -24,6 +27,7 @@ import java.util.List;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final CloudinaryService cloudinaryService;
 
     @Transactional(readOnly = true)
     public PagedResponse<ProductResponse> getProducts(
@@ -67,18 +71,28 @@ public class ProductService {
     @Transactional
     public ProductResponse createProduct(
             CreateProductRequest data
-    ) {
+    ) throws IOException {
+        log.info("Creating product '{}'", data.name());
+
         Product product = Product.builder()
                 .name(data.name())
                 .description(data.description())
                 .price(data.price())
                 .discountPercentage(data.discountPercentage())
                 .discountExpiresAt(data.discountExpiresAt())
-                .imageUrl(data.imageUrl())
                 .stock(data.stock())
                 .build();
 
+        if (data.image() != null && !data.image().isEmpty()) {
+            CloudinaryUploadResult uploadResult = cloudinaryService.uploadImage(data.image(), "products");
+            product.setImageUrl(uploadResult.secureUrl());
+            product.setImagePublicId(uploadResult.publicId());
+        }
+
         Product saved = productRepository.save(product);
+
+        log.info("Product {} created successfully with id={}", saved.getName(), saved.getId());
+
         return ProductResponse.toDto(saved);
     }
 
@@ -86,7 +100,9 @@ public class ProductService {
     public ProductResponse updateProduct(
             Long id,
             @Valid UpdateProductRequest data
-    ) {
+    ) throws IOException {
+        log.info("Updating product with id={}", id);
+
         Product product = getProductById(id);
 
         if(data.name() != null) product.setName(data.name());
@@ -94,10 +110,22 @@ public class ProductService {
         if(data.price() != null) product.setPrice(data.price());
         if(data.discountPercentage() != null) product.setDiscountPercentage(data.discountPercentage());
         if(data.discountExpiresAt() != null) product.setDiscountExpiresAt(data.discountExpiresAt());
-        if(data.imageUrl() != null) product.setImageUrl(data.imageUrl());
+        if (data.image() != null && !data.image().isEmpty()) {
+
+            if (product.getImagePublicId() != null) {
+                cloudinaryService.deleteImage(product.getImagePublicId());
+            }
+
+            CloudinaryUploadResult uploadResult = cloudinaryService.uploadImage(data.image(), "products");
+            product.setImageUrl(uploadResult.secureUrl());
+            product.setImagePublicId(uploadResult.publicId());
+        }
         if(data.stock() != null) product.setStock(data.stock());
 
         Product saved = productRepository.save(product);
+
+        log.info("Product with id={} updated successfully", id);
+
         return ProductResponse.toDto(saved);
     }
 
@@ -105,7 +133,11 @@ public class ProductService {
     public void deleteProduct(
             Long id
     ) {
+        log.info("Deleting product with id={}", id);
+
         Product product = getProductById(id);
         productRepository.delete(product);
+
+        log.info("Product with id={} deleted successfully", id);
     }
 }

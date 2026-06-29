@@ -26,6 +26,7 @@ public class Product {
     @Column(nullable = false) private String name;
     @Column(nullable = false) private String description;
     private String imageUrl;
+    private String imagePublicId;
 
     // Note: single currency assumed (EUR). Multi-currency support out of scope.
     @Column(nullable = false, precision = 10, scale = 2) private BigDecimal price;

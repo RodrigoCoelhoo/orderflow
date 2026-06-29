@@ -1,6 +1,7 @@
 package com.orderflow.order.dto;
 
 import jakarta.validation.constraints.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -26,7 +27,7 @@ public record CreateProductRequest(
 
         LocalDateTime discountExpiresAt,
 
-        String imageUrl,
+        MultipartFile image,
 
         @NotNull(message = "Stock cannot be null")
         @Min(value = 0, message = "Stock cannot be negative")

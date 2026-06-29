@@ -10,9 +10,12 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 @Validated
 @RestController
@@ -38,18 +41,19 @@ public class ProductController {
         return ResponseEntity.ok(productService.getProduct(id));
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ProductResponse> createProduct(
-            @RequestBody @Valid CreateProductRequest data
-    ) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(productService.createProduct(data));
+            @ModelAttribute @Valid CreateProductRequest data
+    ) throws IOException {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(productService.createProduct(data));
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ProductResponse> updateProduct(
             @PathVariable Long id,
-            @RequestBody @Valid UpdateProductRequest data
-    ) {
+            @ModelAttribute @Valid UpdateProductRequest data
+    ) throws IOException {
         return ResponseEntity.ok(productService.updateProduct(id, data));
     }
 
