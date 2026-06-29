@@ -1,4 +1,4 @@
-package com.orderflow.order.config;
+package com.orderflow.order.config.db;
 
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 

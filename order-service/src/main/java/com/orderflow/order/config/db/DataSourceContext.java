@@ -1,4 +1,4 @@
-package com.orderflow.order.config;
+package com.orderflow.order.config.db;
 
 public class DataSourceContext {
 
