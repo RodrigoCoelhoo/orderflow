@@ -1,8 +1,8 @@
 package com.orderflow.order.controller;
 
-import com.orderflow.order.dto.CreateProductRequest;
-import com.orderflow.order.dto.ProductResponse;
-import com.orderflow.order.dto.UpdateProductRequest;
+import com.orderflow.order.dto.product.CreateProductRequest;
+import com.orderflow.order.dto.product.ProductResponse;
+import com.orderflow.order.dto.product.UpdateProductRequest;
 import com.orderflow.order.service.ProductService;
 import com.orderflow.order.utils.PagedResponse;
 import jakarta.validation.Valid;
@@ -60,7 +60,7 @@ public class ProductController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(
             @PathVariable Long id
-    ) {
+    ) throws IOException {
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }

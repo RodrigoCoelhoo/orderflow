@@ -1,4 +1,4 @@
-package com.orderflow.order.dto;
+package com.orderflow.order.dto.product;
 
 import com.orderflow.order.model.Product;
 
@@ -16,7 +16,7 @@ public record ProductResponse(
         String imageUrl,
         Integer stock
 ) {
-    public static ProductResponse toDto(Product data) {
+    public static ProductResponse toDto(Product data, Integer availableStock) {
         return new ProductResponse(
                 data.getId(),
                 data.getName(),
@@ -26,7 +26,7 @@ public record ProductResponse(
                 data.getDiscountExpiresAt(),
                 data.getEffectivePrice(),
                 data.getImageUrl(),
-                data.getStock()
+                availableStock
         );
     }
 }
