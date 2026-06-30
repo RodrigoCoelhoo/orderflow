@@ -88,6 +88,7 @@ services:
       CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
       CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
       CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY}
     volumes:
       - ./order-service:/app      
       - maven-cache:/root/.m2   
@@ -122,6 +123,7 @@ services:
     build: ./inventory-service
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY}
     volumes:
       - ./inventory-service:/app
       - maven-cache:/root/.m2
