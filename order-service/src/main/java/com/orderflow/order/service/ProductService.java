@@ -1,8 +1,10 @@
 package com.orderflow.order.service;
 
-import com.orderflow.order.dto.CreateProductRequest;
-import com.orderflow.order.dto.ProductResponse;
-import com.orderflow.order.dto.UpdateProductRequest;
+import com.orderflow.order.client.InventoryClient;
+import com.orderflow.order.dto.inventory.StockResponse;
+import com.orderflow.order.dto.product.CreateProductRequest;
+import com.orderflow.order.dto.product.ProductResponse;
+import com.orderflow.order.dto.product.UpdateProductRequest;
 import com.orderflow.order.exceptions.ResourceNotFound;
 import com.orderflow.order.model.Product;
 import com.orderflow.order.repository.ProductRepository;
@@ -20,6 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -28,6 +32,7 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final CloudinaryService cloudinaryService;
+    private final InventoryClient inventoryClient;
 
     @Transactional(readOnly = true)
     public PagedResponse<ProductResponse> getProducts(
@@ -40,8 +45,12 @@ public class ProductService {
                 ? productRepository.findByNameContainingIgnoreCase(name, pageable)
                 : productRepository.findAll(pageable);
 
+        List<Long> productIds = products.getContent().stream().map(Product::getId).toList();
+        Map<Long, Integer> stockMap = inventoryClient.getStockBatch(productIds).stream()
+                .collect(Collectors.toMap(StockResponse::productId, StockResponse::availableQuantity));
+
         List<ProductResponse> content = products.getContent().stream()
-                .map(ProductResponse::toDto)
+                .map(p -> ProductResponse.toDto(p, stockMap.getOrDefault(p.getId(), 0)))
                 .toList();
 
         return new PagedResponse<>(
@@ -57,7 +66,9 @@ public class ProductService {
             Long id
     ) {
         Product product = getProductById(id);
-        return ProductResponse.toDto(product);
+        List<StockResponse> stock = inventoryClient.getStockBatch(List.of(product.getId()));
+
+        return ProductResponse.toDto(product, stock.getFirst().availableQuantity());
     }
 
     @Transactional(readOnly = true)
@@ -80,7 +91,6 @@ public class ProductService {
                 .price(data.price())
                 .discountPercentage(data.discountPercentage())
                 .discountExpiresAt(data.discountExpiresAt())
-                .stock(data.stock())
                 .build();
 
         if (data.image() != null && !data.image().isEmpty()) {
@@ -91,9 +101,11 @@ public class ProductService {
 
         Product saved = productRepository.save(product);
 
+        inventoryClient.createStock(saved.getId(), data.initialStock());
+
         log.info("Product {} created successfully with id={}", saved.getName(), saved.getId());
 
-        return ProductResponse.toDto(saved);
+        return ProductResponse.toDto(saved, data.initialStock());
     }
 
     @Transactional
@@ -120,23 +132,37 @@ public class ProductService {
             product.setImageUrl(uploadResult.secureUrl());
             product.setImagePublicId(uploadResult.publicId());
         }
-        if(data.stock() != null) product.setStock(data.stock());
 
         Product saved = productRepository.save(product);
 
+        Integer updatedStock = data.stock() != null ? data.stock() : null;
+
+        if (updatedStock != null) {
+            inventoryClient.adjustStock(id, updatedStock);
+        }
+
+        List<StockResponse> stock = inventoryClient.getStockBatch(List.of(saved.getId()));
+
         log.info("Product with id={} updated successfully", id);
 
-        return ProductResponse.toDto(saved);
+        return ProductResponse.toDto(saved, stock.getFirst().availableQuantity());
     }
 
     @Transactional
     public void deleteProduct(
             Long id
-    ) {
+    ) throws IOException {
         log.info("Deleting product with id={}", id);
 
         Product product = getProductById(id);
+
+        if (product.getImagePublicId() != null) {
+            cloudinaryService.deleteImage(product.getImagePublicId());
+        }
+
         productRepository.delete(product);
+
+        inventoryClient.deleteStock(id);
 
         log.info("Product with id={} deleted successfully", id);
     }
