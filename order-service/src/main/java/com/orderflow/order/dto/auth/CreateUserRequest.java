@@ -1,4 +1,4 @@
-package com.orderflow.order.dto;
+package com.orderflow.order.dto.auth;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

@@ -1,12 +1,12 @@
 package com.orderflow.order.controller;
 
 import com.orderflow.order.model.User;
-import com.orderflow.order.dto.AuthResponse;
+import com.orderflow.order.dto.auth.AuthResponse;
 import com.orderflow.order.service.AuthenticationService;
 import com.orderflow.order.service.UserService;
-import com.orderflow.order.dto.CreateUserRequest;
-import com.orderflow.order.dto.SignInRequest;
-import com.orderflow.order.dto.UserProfile;
+import com.orderflow.order.dto.auth.CreateUserRequest;
+import com.orderflow.order.dto.auth.SignInRequest;
+import com.orderflow.order.dto.auth.UserProfile;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

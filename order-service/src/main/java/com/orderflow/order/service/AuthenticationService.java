@@ -2,7 +2,7 @@ package com.orderflow.order.service;
 
 import com.orderflow.order.model.User;
 import com.orderflow.order.exceptions.InvalidTokenException;
-import com.orderflow.order.dto.AuthResponse;
+import com.orderflow.order.dto.auth.AuthResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

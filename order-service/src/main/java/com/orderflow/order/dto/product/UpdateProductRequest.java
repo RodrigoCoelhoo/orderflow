@@ -1,4 +1,4 @@
-package com.orderflow.order.dto;
+package com.orderflow.order.dto.product;
 
 import jakarta.validation.constraints.*;
 import org.springframework.web.multipart.MultipartFile;

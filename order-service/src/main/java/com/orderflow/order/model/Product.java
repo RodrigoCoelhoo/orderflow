@@ -33,8 +33,6 @@ public class Product {
     @Column(nullable = false) private int discountPercentage;
     private LocalDateTime discountExpiresAt;
 
-    @Column(nullable = false) private Integer stock;
-
     @CreatedDate private LocalDateTime createdAt;
     @LastModifiedDate private LocalDateTime updatedAt;
 

@@ -3,7 +3,7 @@ package com.orderflow.order.config.security;
 import com.orderflow.order.service.TokenService;
 import com.orderflow.order.model.User;
 import com.orderflow.order.repository.UserRepository;
-import com.orderflow.order.dto.UserProfile;
+import com.orderflow.order.dto.auth.UserProfile;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

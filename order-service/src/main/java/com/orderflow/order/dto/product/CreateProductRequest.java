@@ -1,4 +1,4 @@
-package com.orderflow.order.dto;
+package com.orderflow.order.dto.product;
 
 import jakarta.validation.constraints.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,5 +31,5 @@ public record CreateProductRequest(
 
         @NotNull(message = "Stock cannot be null")
         @Min(value = 0, message = "Stock cannot be negative")
-        Integer stock
+        Integer initialStock
 ) {}
