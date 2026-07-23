@@ -5,6 +5,6 @@ import jakarta.validation.constraints.NotEmpty;
 
 import java.util.List;
 
-public record StockAvailabilityRequest(
-        @NotEmpty @Valid List<StockCheckItem> items
+public record StockReserveRequest(
+        @NotEmpty @Valid List<StockReserveItem> items
 ) {}

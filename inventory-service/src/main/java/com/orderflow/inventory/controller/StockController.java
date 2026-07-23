@@ -24,13 +24,6 @@ public class StockController {
         return ResponseEntity.ok(stockService.getStockBatch(productIds));
     }
 
-    @PostMapping("/check-availability")
-    public ResponseEntity<StockAvailabilityResponse> checkAvailability(
-            @Valid @RequestBody StockAvailabilityRequest request
-    ) {
-        return ResponseEntity.ok(stockService.checkAvailability(request));
-    }
-
     @PostMapping("/{productId}")
     public ResponseEntity<Void> createStock(
             @PathVariable Long productId,
@@ -54,6 +47,30 @@ public class StockController {
             @PathVariable Long productId
     ) {
         stockService.deleteStock(productId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/reserve")
+    public ResponseEntity<Void> reserveStock(
+            @Valid @RequestBody StockReserveRequest request
+    ) {
+        stockService.reserveStock(request);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/release")
+    public ResponseEntity<Void> releaseStock(
+            @Valid @RequestBody StockReserveRequest request
+    ) {
+        stockService.releaseStock(request);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/confirm")
+    public ResponseEntity<Void> confirmStock(
+            @Valid @RequestBody StockReserveRequest request
+    ) {
+        stockService.confirmStock(request);
         return ResponseEntity.noContent().build();
     }
 }
