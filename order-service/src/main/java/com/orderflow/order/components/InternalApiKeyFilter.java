@@ -17,6 +17,11 @@ public class InternalApiKeyFilter extends OncePerRequestFilter {
     private String expectedApiKey;
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        return !request.getRequestURI().startsWith("/internal/");
+    }
+
+    @Override
     protected void doFilterInternal(
             HttpServletRequest request,
             HttpServletResponse response,
