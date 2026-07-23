@@ -1,11 +1,13 @@
 package com.orderflow.order.config.security;
 
+import com.orderflow.order.components.InternalApiKeyFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 //import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -28,11 +30,26 @@ public class SecurityConfiguration {
 
     private final SecurityFilter securityFilter;
     private final RateLimitFilter rateLimitFilter;
+    private final InternalApiKeyFilter internalApiKeyFilter;
 
     //@Value("${frontend.url}")
     //private String frontendUrl;
 
     @Bean
+    @Order(1)
+    public SecurityFilterChain internalSecurityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .securityMatcher("/internal/**")
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+                .addFilterBefore(internalApiKeyFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
+
+    @Bean
+    @Order(2)
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
                 .csrf(csrf -> csrf.disable())
