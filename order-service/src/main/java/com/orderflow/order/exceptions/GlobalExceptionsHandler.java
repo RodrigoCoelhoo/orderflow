@@ -114,6 +114,23 @@ public class GlobalExceptionsHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
     }
 
+    @ExceptionHandler(DuplicateIdempotencyKeyException.class)
+    public ResponseEntity<Object> handleDuplicateIdempotencyKeyException(
+            DuplicateIdempotencyKeyException ex
+    ) {
+        Map<String, Object> body = globalExceptionHeader(HttpStatus.CONFLICT, "Conflict");
+        body.put("message", ex.getMessage());
+
+        return new ResponseEntity<>(body, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler({InventoryServiceUnavailableException.class, PaymentServiceUnavailableException.class})
+    public ResponseEntity<Object> handleInventoryServiceUnavailableException(InventoryServiceUnavailableException ex) {
+        Map<String, Object> body = globalExceptionHeader(HttpStatus.SERVICE_UNAVAILABLE,"Service Unavailable");
+        body.put("message", ex.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.SERVICE_UNAVAILABLE);
+    }
+
     private void recordError(Exception ex) {
         log.info("Recording metric for {}", ex.getClass().getSimpleName());
         //meterRegistry.counter(BACKEND_ERRORS, TAG_EXCEPTION, ex.getClass().getSimpleName()).increment();
