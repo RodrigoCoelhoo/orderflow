@@ -30,6 +30,8 @@ public class StripeWebhookService {
             throw new InvalidStripeWebhookException();
         }
 
+        log.info("Processing Stripe event: {} (id={})", event.getType(), event.getId());
+
         switch (event.getType()) {
             case "payment_intent.succeeded" -> handlePaymentSucceeded(event);
             case "payment_intent.payment_failed" -> handlePaymentFailed(event);
@@ -39,12 +41,18 @@ public class StripeWebhookService {
 
     private void handlePaymentSucceeded(Event event) {
         PaymentIntent intent = getPaymentIntent(event);
+        log.info("Payment succeeded for paymentIntentId={}. Notifying order service.", intent.getId());
+
         orderServiceClient.notifyPaymentSucceeded(intent.getId());
+        log.info("Order service successfully notified of successful payment: paymentIntentId={}.", intent.getId());
     }
 
     private void handlePaymentFailed(Event event) {
         PaymentIntent intent = getPaymentIntent(event);
+        log.info("Payment failed for paymentIntentId={}. Notifying order service.", intent.getId());
+
         orderServiceClient.notifyPaymentFailed(intent.getId());
+        log.info("Order service successfully notified of failed payment: paymentIntentId={}.", intent.getId());
     }
 
     private PaymentIntent getPaymentIntent(Event event) {
