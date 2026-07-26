@@ -47,54 +47,53 @@ public class SecurityConfiguration {
 
     @Bean
     @Order(1)
-    public SecurityFilterChain internalSecurityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .securityMatcher("/internal/**")
-                .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
-                .addFilterBefore(internalApiKeyFilter, UsernamePasswordAuthenticationFilter.class);
+    public SecurityFilterChain internalSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
+        httpSecurity.securityMatcher("/internal/**")
+            .csrf(csrf -> csrf.disable())
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+            .addFilterBefore(internalApiKeyFilter, UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
+        return httpSecurity.build();
     }
 
     @Bean
     @Order(2)
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity
-                .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling(exception ->
-                        exception.authenticationEntryPoint(new AuthenticationEntryPoint() {
-                            @Override
-                            public void commence(
-                                    HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    AuthenticationException authException
-                            ) throws IOException {
-                                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
-                            }
-                        })
-                )
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(HttpMethod.POST, "/api/auth/signup").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/signin").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/api/auth/refresh").permitAll()
+        httpSecurity.securityMatcher("/api/**", "/graphql", "/graphiql/**")
+            .csrf(csrf -> csrf.disable())
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .exceptionHandling(exception ->
+                    exception.authenticationEntryPoint(new AuthenticationEntryPoint() {
+                        @Override
+                        public void commence(
+                                HttpServletRequest request,
+                                HttpServletResponse response,
+                                AuthenticationException authException
+                        ) throws IOException {
+                            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+                        }
+                    })
+            )
+            .authorizeHttpRequests(authorize -> authorize
+                    .requestMatchers(HttpMethod.POST, "/api/auth/signup").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/auth/signin").permitAll()
+                    .requestMatchers(HttpMethod.POST,"/api/auth/refresh").permitAll()
 
-                        .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/products/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/products/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/api/products/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/products/**").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.PUT, "/api/products/**").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.PATCH, "/api/products/**").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasRole("ADMIN")
 
-                        .requestMatchers(
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**",
-                                "/swagger-resources/**",
-                                "/webjars/**"
-                        ).permitAll()
-                        .anyRequest().authenticated()
-                );
+                    .requestMatchers(
+                            "/swagger-ui/**",
+                            "/v3/api-docs/**",
+                            "/swagger-resources/**",
+                            "/webjars/**"
+                    ).permitAll()
+                    .anyRequest().authenticated()
+            );
 
         httpSecurity.addFilterBefore(corsFilter(), UsernamePasswordAuthenticationFilter.class);
         httpSecurity.addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class);
