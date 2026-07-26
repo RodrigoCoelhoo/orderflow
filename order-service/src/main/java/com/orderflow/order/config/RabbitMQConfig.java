@@ -88,15 +88,4 @@ public class RabbitMQConfig {
     public MessageConverter jsonMessageConverter() {
         return new Jackson2JsonMessageConverter();
     }
-
-    // RabbitTemplate used to publish messages to RabbitMQ.
-    /*@Bean
-    public AmqpTemplate rabbitTemplate(
-            ConnectionFactory connectionFactory,
-            MessageConverter converter
-    ) {
-        RabbitTemplate template = new RabbitTemplate(connectionFactory);
-        template.setMessageConverter(converter);
-        return template;
-    }*/
 }

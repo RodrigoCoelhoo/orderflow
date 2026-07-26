@@ -6,5 +6,5 @@ import java.time.Duration;
 
 @NoArgsConstructor
 public class OrderConstants {
-    public static final Duration PAYMENT_WINDOW = Duration.ofMinutes(2);
+    public static final Duration PAYMENT_WINDOW = Duration.ofMinutes(15);
 }
