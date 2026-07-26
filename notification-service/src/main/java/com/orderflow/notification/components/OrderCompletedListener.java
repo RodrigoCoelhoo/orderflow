@@ -2,7 +2,7 @@ package com.orderflow.notification.components;
 
 import com.orderflow.notification.config.RabbitMQConfig;
 import com.orderflow.notification.dto.EmailData;
-import com.orderflow.notification.service.EmailService;
+import com.orderflow.notification.service.NotificationService;
 import com.rabbitmq.client.Channel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +18,7 @@ import java.io.IOException;
 @Slf4j
 public class OrderCompletedListener {
 
-    private final EmailService emailService;
+    private final NotificationService emailService;
 
     @RabbitListener(queues = RabbitMQConfig.ORDER_COMPLETED_QUEUE)
     public void handleOrderCompleted(
