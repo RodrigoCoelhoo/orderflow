@@ -22,7 +22,7 @@
     </properties>
 
     <dependencies>
-        <!-- Web (para receber webhook do Stripe) -->
+        <!-- Web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -45,7 +45,7 @@
         <dependency>
             <groupId>com.stripe</groupId>
             <artifactId>stripe-java</artifactId>
-            <version>${stripe.version}</version>
+            <version>33.1.1</version>
         </dependency>
 
         <!-- Validation -->
