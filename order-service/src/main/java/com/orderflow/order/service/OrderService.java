@@ -39,7 +39,7 @@ public class OrderService {
     private final ApplicationEventPublisher eventPublisher;
     private final RedisTemplate<String, String> redisTemplate;
     private final ObjectMapper objectMapper;
-    //private final StripeService stripeService;
+    private final StripeService stripeService;
 
     private static final Duration IDEMPOTENCY_TTL = Duration.ofHours(24);
 
@@ -64,16 +64,21 @@ public class OrderService {
             publishOrderCreated(order);
 
             return cacheResponse(cacheKey, userId, order, clientSecret);
-        } catch (PaymentServiceUnavailableException e) {
+        }
+        catch (PaymentServiceUnavailableException e) {
             throw e;
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             log.error("Order creation failed, releasing stock [userId={}]", userId, e);
             inventoryClient.releaseStock(reserveRequest);
             throw e;
         }
     }
 
-    private OrderResponse getCachedResponse(String cacheKey, Long userId) {
+    private OrderResponse getCachedResponse(
+            String cacheKey,
+            Long userId
+    ) {
         String cached = redisTemplate.opsForValue().get(cacheKey);
 
         if (cached == null) return null;
@@ -89,8 +94,9 @@ public class OrderService {
         return record.response();
     }
 
-    private Map<Long, Product> validateAndLoadProducts(CreateOrderRequest request) {
-
+    private Map<Long, Product> validateAndLoadProducts(
+            CreateOrderRequest request
+    ) {
         List<Long> productIds = request.items().stream()
                 .map(OrderItemRequest::productId)
                 .toList();
@@ -127,11 +133,8 @@ public class OrderService {
             StockReserveRequest reserveRequest
     ) {
         try {
-            // String clientSecret = stripeService.createPaymentIntent(order.getTotalAmount());
-            String clientSecret = "pi_test_secret";
-
-            // order.setStripePaymentIntentId(stripeService.extractPaymentIntentId(clientSecret));
-            order.setStripePaymentIntentId(clientSecret);
+            String clientSecret = stripeService.createPaymentIntent(order.getTotalAmount());
+            order.setStripePaymentIntentId(stripeService.extractPaymentIntentId(clientSecret));
 
             orderRepository.save(order);
 
@@ -187,8 +190,8 @@ public class OrderService {
                 eventPublisher.publishEvent(new OrderCompletedEvent(order));
             }
             case EXPIRED -> {
-                log.warn("Payment succeeded for an already expired order — refunding [orderId={}]", order.getId());
-                //stripeService.refundPaymentIntent(paymentIntentId);
+                log.warn("Payment succeeded for an already expired order - refunding [orderId={}]", order.getId());
+                stripeService.refundPaymentIntent(paymentIntentId);
             }
             case COMPLETED -> log.info("Order already completed, ignoring duplicate webhook [orderId={}]", order.getId());
             case PAYMENT_FAILED -> log.warn("Payment succeeded for an order marked as failed - refunding [orderId={}]", order.getId());
@@ -199,11 +202,9 @@ public class OrderService {
     @Transactional
     public void handlePaymentFailed(String paymentIntentId) {
         Order order = orderRepository.findByStripePaymentIntentId(paymentIntentId)
-                .orElseThrow(() -> new ResourceNotFound("Order not found for paymentIntentId: " + paymentIntentId));
+            .orElseThrow(() -> new ResourceNotFound("Order not found for paymentIntentId: " + paymentIntentId));
 
-        if (order.getStatus() != OrderStatus.PENDING) {
-            return;
-        }
+        if (order.getStatus() != OrderStatus.PENDING) return;
 
         order.setStatus(OrderStatus.PAYMENT_FAILED);
         orderRepository.save(order);
@@ -216,18 +217,17 @@ public class OrderService {
     @Transactional
     public void expireOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new ResourceNotFound("Order not found"));
+            .orElseThrow(() -> new ResourceNotFound("Order not found"));
 
         if (order.getStatus() != OrderStatus.PENDING) {
             log.info("Order not PENDING, ignoring expiry [orderId={}, status={}]", order.getId(), order.getStatus());
             return;
         }
 
-        // Status primeiro, commit, só depois os side effects
         order.setStatus(OrderStatus.EXPIRED);
         orderRepository.save(order);
 
-        //stripeService.cancelPaymentIntent(order.getStripePaymentIntentId());
+        stripeService.cancelPaymentIntent(order.getStripePaymentIntentId());
         inventoryClient.releaseStock(toStockRequest(order));
 
         log.info("Order expired [orderId={}]", order.getId());
@@ -236,7 +236,7 @@ public class OrderService {
     @Transactional(readOnly = true)
     public OrderResponse getOrderById(Long id, Long userId) {
         Order order = orderRepository.findByIdAndUserId(id, userId)
-                .orElseThrow(() -> new ResourceNotFound("Order not found"));
+            .orElseThrow(() -> new ResourceNotFound("Order not found"));
 
         return OrderResponse.toDto(order, null);
     }
