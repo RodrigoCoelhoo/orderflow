@@ -3,7 +3,7 @@ set -e
 
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<EOSQL
     CREATE DATABASE orderflow_inventory;
-    CREATE DATABASE orderflow_saga;
+    CREATE DATABASE orderflow_notification;
 
     CREATE ROLE replicator WITH REPLICATION LOGIN PASSWORD 'replicator';
 EOSQL

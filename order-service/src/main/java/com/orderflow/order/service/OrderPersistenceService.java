@@ -3,6 +3,7 @@ package com.orderflow.order.service;
 import com.orderflow.order.config.OrderConstants;
 import com.orderflow.order.dto.order.CreateOrderRequest;
 import com.orderflow.order.dto.order.OrderItemRequest;
+import com.orderflow.order.model.Address;
 import com.orderflow.order.model.Order;
 import com.orderflow.order.model.OrderItem;
 import com.orderflow.order.model.Product;
@@ -22,6 +23,7 @@ import java.util.Map;
 public class OrderPersistenceService {
 
     private final OrderRepository orderRepository;
+    private final AddressService addressService;
 
     @Transactional
     public Order saveOrder(
@@ -29,7 +31,6 @@ public class OrderPersistenceService {
             Map<Long, Product> products,
             Long userId
     ) {
-
         List<OrderItem> orderItems = new ArrayList<>();
         BigDecimal totalAmount = BigDecimal.ZERO;
 
@@ -39,6 +40,7 @@ public class OrderPersistenceService {
             OrderItem item = OrderItem.builder()
                     .productId(product.getId())
                     .productName(product.getName())
+                    .productImageUrl(product.getImageUrl())
                     .originalPrice(product.getPrice())
                     .discountPercentage(product.getDiscountPercentage())
                     .unitPrice(product.getEffectivePrice())
@@ -48,15 +50,20 @@ public class OrderPersistenceService {
             orderItems.add(item);
 
             totalAmount = totalAmount.add(
-                    item.getUnitPrice()
-                            .multiply(BigDecimal.valueOf(item.getQuantity()))
+                    item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity()))
             );
         }
+
+        Address address = addressService.getOwnedAddress(request.addressId(), userId);
 
         Order order = Order.builder()
                 .userId(userId)
                 .totalAmount(totalAmount)
                 .paymentDeadline(LocalDateTime.now().plus(OrderConstants.PAYMENT_WINDOW))
+                .shippingStreet(address.getStreet())
+                .shippingCity(address.getCity())
+                .shippingPostalCode(address.getPostalCode())
+                .shippingCountry(address.getCountry())
                 .build();
 
         orderItems.forEach(item -> item.setOrder(order));

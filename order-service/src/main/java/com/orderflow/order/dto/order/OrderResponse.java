@@ -1,5 +1,6 @@
 package com.orderflow.order.dto.order;
 
+import com.orderflow.order.dto.addresses.ShippingAddress;
 import com.orderflow.order.model.Order;
 
 import java.math.BigDecimal;
@@ -13,12 +14,20 @@ public record OrderResponse(
         String clientSecret,
         LocalDateTime paymentDeadline,
         List<OrderItemResponse> items,
+        ShippingAddress shippingAddress,
         LocalDateTime createdAt
 ) {
     public static OrderResponse toDto(Order order, String clientSecret) {
         List<OrderItemResponse> itemResponses = order.getItems().stream()
                 .map(OrderItemResponse::toDTO)
                 .toList();
+
+        ShippingAddress address = new ShippingAddress(
+                order.getShippingStreet(),
+                order.getShippingCity(),
+                order.getShippingPostalCode(),
+                order.getShippingCountry()
+        );
 
         return new OrderResponse(
                 order.getId(),
@@ -27,6 +36,7 @@ public record OrderResponse(
                 clientSecret,
                 order.getPaymentDeadline(),
                 itemResponses,
+                address,
                 order.getCreatedAt()
         );
     }

@@ -28,6 +28,9 @@ public class OrderItem {
     @Column(nullable = false)
     private String productName;
 
+    @Column
+    private String productImageUrl;
+
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal originalPrice;     // price before discount
 

@@ -1,27 +1,22 @@
 package com.orderflow.order.model;
 
-import com.orderflow.order.enums.OrderStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
-@Table(name = "orders")
+@Table(name = "addresses")
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
 @Builder
-public class Order {
-
+public class Address {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -29,34 +24,24 @@ public class Order {
     @Column(nullable = false)
     private Long userId;
 
+    @Column(nullable = false)
+    private String label;          // ex: "Casa", "Trabalho"
+
+    @Column(nullable = false)
+    private String street;
+
+    @Column(nullable = false)
+    private String city;
+
+    @Column(nullable = false)
+    private String postalCode;
+
+    @Column(nullable = false)
+    private String country;
+
     @Builder.Default
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private OrderStatus status = OrderStatus.PENDING;
-
-    @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal totalAmount;
-
-    @Column
-    private String stripePaymentIntentId;
-
-    @Column(nullable = false)
-    private LocalDateTime paymentDeadline;
-
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<OrderItem> items = new ArrayList<>();
-
-    @Column(nullable = false)
-    private String shippingStreet;
-
-    @Column(nullable = false)
-    private String shippingCity;
-
-    @Column(nullable = false)
-    private String shippingPostalCode;
-
-    @Column(nullable = false)
-    private String shippingCountry;
+    private boolean isDefault = false;
 
     @CreatedDate
     @Column(updatable = false)
