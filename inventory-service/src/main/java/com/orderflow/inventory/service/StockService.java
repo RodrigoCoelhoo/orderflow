@@ -66,6 +66,11 @@ public class StockService {
             Integer newQuantity
     ) {
         StockItem item = getStockItemById(productId);
+
+        if(newQuantity < item.getReservedQuantity()) {
+            throw new BadRequestException("Stock quantity cannot be lower than the reserved quantity.");
+        }
+
         item.setQuantity(newQuantity);
         stockRepository.save(item);
 
