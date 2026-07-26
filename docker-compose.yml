@@ -142,6 +142,7 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: docker
       RESEND_API_KEY: ${RESEND_API_KEY}
+      RESEND_TO: ${RESEND_TO}
     volumes:
       - ./notification-service:/app
       - maven-cache:/root/.m2
