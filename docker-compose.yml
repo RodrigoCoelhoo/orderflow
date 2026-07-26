@@ -89,6 +89,7 @@ services:
       CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
       CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
       INTERNAL_API_KEY: ${INTERNAL_API_KEY}
+      STRIPE_API_KEY: ${STRIPE_API_KEY}
     volumes:
       - ./order-service:/app      
       - maven-cache:/root/.m2   
@@ -110,6 +111,7 @@ services:
       SPRING_PROFILES_ACTIVE: docker
       STRIPE_API_KEY: ${STRIPE_API_KEY}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY}
     volumes:
       - ./payment-service:/app
       - maven-cache:/root/.m2
@@ -135,12 +137,13 @@ services:
     networks:
       - orderflow-net
 
-  saga-service:
-    build: ./saga-service
+  notification-service:
+    build: ./notification-service
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      RESEND_API_KEY: ${RESEND_API_KEY}
     volumes:
-      - ./saga-service:/app
+      - ./notification-service:/app
       - maven-cache:/root/.m2
     depends_on:
       postgres-master:
@@ -160,7 +163,7 @@ services:
       - order-service
       - payment-service
       - inventory-service
-      - saga-service
+      - notification-service
     networks:
       - orderflow-net
 
